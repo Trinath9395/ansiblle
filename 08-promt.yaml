@@ -12,3 +12,4 @@
     - name: print the prompt variables
       ansible.builtin.debug:
         msg: "Course name is {{ COURSE }}, duration is {{ DURATION }}, trainer name is {{ TRAINER }}"
+  
