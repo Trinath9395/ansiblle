@@ -1,0 +1,17 @@
+- name: variables
+  hosts: local 
+  connection: local 
+  vars: 
+    COURSE: DevOps and Azure 
+    DURATION: 150HR 
+    TRAINER: Gree 
+  tasks: 
+  - name: print the variables
+    vars:
+      COURSE: Ansible
+    ansible.builtin.debug: 
+      msg: Course name is {{ COURSE }}, duration is {{ DURATION }}, trainer name is {{ TRAINER }}
+
+  - name: print global variables 
+    ansible.builtin.debug:
+      msg: Course name is {{ COURSE }}, duration is {{ DURATION }}, trainer name is {{ TRAINER }}   
