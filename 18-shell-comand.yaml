@@ -4,5 +4,13 @@
   tasks: 
   - name: execute command 
     ansible.builtin.shell: ls -ltr > /tmp/output.txt
+    #ansible.builtin.command: ls -ltr 
 
+  - name: execute ls command 
+    ansible.builtin.command: 
+    register: command_result 
+
+  - name: print the output 
+    ansible.builtin.debug: 
+      msg: "{{ command_result }}"
         
