@@ -5,4 +5,11 @@
   - name: handle undefined variables 
     ansible.builtin.debug: 
       msg: "Hello {{ person | default('trinath') }}"
+
+  - name: converting string to list 
+    vars:
+      fruits: "apple, banana, orange"
+    ansible.builtin.debug: 
+      msg: "{{ fruits | split (',') }}"
+
       
