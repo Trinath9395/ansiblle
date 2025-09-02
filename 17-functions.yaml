@@ -1,0 +1,8 @@
+- name: undefined vasibels 
+  hosts: local 
+  connection: local 
+  tasks: 
+  - name: handle undefined variables 
+    ansible.builtin.debug: 
+      msg: "Hello {{ person | default('trinath') }}"
+      
