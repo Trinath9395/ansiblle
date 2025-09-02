@@ -1,11 +1,14 @@
-- name: loops 
-  hosts: local 
-  connection: local 
+- name: install packages 
+  hosts: web 
+  become: yes
   tasks: 
-  - name: print names 
-    ansible.builtin.debug:
-      msg: "Hello {{ item }}"
+  - name: install packages 
+    ansible.builtin.package:
+      name: "{{ item }}"
+      state: installed 
     loop:
-    - Trinath 
-    - greeshu
-    - swetha 
+    - gcc 
+    - mysql 
+    - git 
+    - zip 
+
