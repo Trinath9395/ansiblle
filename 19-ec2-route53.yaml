@@ -34,20 +34,20 @@
         msg: "{{ ec2_info }}"
 
 
-    - name: extract mysql private ip
-      set_fact:
-        mysql_private_ip: "{{ item.instances[0].private_ip_address }}"
+    - name: print mysql private ip
+      debug:
+        msg: "{{ item.instances[0].private_ip_address }}"
       loop: "{{ ec2_info.results }}"
       when: item.instances[0].tags.Name == "mysql"
 
-    - name: extract backend private ip
-      set_fact:
-        backend_private_ip: "{{ item.instances[0].private_ip_address }}"
+    - name: print backend private ip
+      debug:
+        msg: "{{ item.instances[0].private_ip_address }}"
       loop: "{{ ec2_info.results }}"
       when: item.instances[0].tags.Name == "backend"
 
-    - name: extract frontend public ip
-      set_fact:
-        frontend_public_ip: "{{ item.instances[0].public_ip_address }}"
+    - name: print frontend public ip
+      debug:
+        msg: "{{ item.instances[0].public_ip_address }}"
       loop: "{{ ec2_info.results }}"
       when: item.instances[0].tags.Name == "frontend"
