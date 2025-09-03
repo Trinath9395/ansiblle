@@ -1,0 +1,42 @@
+- name: destroy ec2 instances and route53 records
+  hosts: local
+  connection: local
+  vars:
+    instances:
+      - mysql
+      - backend
+      - frontend
+    zone: trinath.online  # replace with your Route53 zone
+
+  tasks:
+    - name: gather ec2 info for instances
+      amazon.aws.ec2_instance_info:
+        filters:
+          "tag:Name": "{{ instances }}"
+          "instance-state-name": ["running", "stopped"]
+      register: ec2_info
+
+    - name: terminate ec2 instances
+      amazon.aws.ec2_instance:
+        instance_ids: "{{ item.instance_id }}"
+        state: absent
+        wait: true
+      loop: "{{ ec2_info.instances }}"
+
+    - name: delete route53 records for mysql & backend (private IPs)
+      amazon.aws.route53:
+        state: absent
+        zone: "{{ zone }}"
+        record: "{{ item.tags.Name }}.{{ zone }}"
+        type: A
+      loop: "{{ ec2_info.instances }}"
+      when: item.tags.Name in ["mysql", "backend"]
+
+    - name: delete route53 record for frontend (public IP)
+      amazon.aws.route53:
+        state: absent
+        zone: "{{ zone }}"
+        record: "{{ zone }}"
+        type: A
+      loop: "{{ ec2_info.instances }}"
+      when: item.tags.Name == "frontend"
