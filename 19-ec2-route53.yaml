@@ -1,66 +1,68 @@
-  - name: create ec2 instances and route53 domains 
-    hosts: local 
-    connection: local
-    vars:
-      subnet_id: subnet-0f970ac6fb262b6cb
-      sg_id: sg-0e142280b2978f20a
-      ami_id: ami-09c813fb71547fc4f
-      instance_type: t2.micro 
-      instances: 
-       - mysql 
-       - backend 
-       - frontend 
-    tasks: 
-    - name: install Aws Python libraries 
+- name: create ec2 instances and route53 domains
+  hosts: local
+  connection: local
+  vars:
+    subnet_id: subnet-0f970ac6fb262b6cb
+    sg_id: sg-0e142280b2978f20a
+    ami_id: ami-09c813fb71547fc4f
+    instance_type: t2.micro
+    instances:
+      - mysql
+      - backend
+      - frontend
+    zone: trinath.online   # replace with your Route53 zone
+
+  tasks:
+    - name: install Aws Python libraries
       ansible.builtin.pip:
         name: "{{ item }}"
-        executable: pip3.9 
+        executable: pip3.9
       loop:
-      - boto3 
-      - botocore 
+        - boto3
+        - botocore
 
-    - name: create ec2 instances 
+    - name: create ec2 instances
       amazon.aws.ec2_instance:
         name: "{{ item }}"
         subnet_id: "{{ subnet_id }}"
         security_group: "{{ sg_id }}"
         image_id: "{{ ami_id }}"
         instance_type: "{{ instance_type }}"
+        wait: true
       loop: "{{ instances }}"
       register: ec2_info
 
-    # - name: print ec2 info 
-    #   ansible.builtin.debug: 
-    #     msg: "{{ ec2_info }}"
+    - name: print ec2_info
+      ansible.builtin.debug:
+        msg: "{{ ec2_info }}"
 
-  - name: print private IP addresses
-    ansible.builtin.debug:
-      msg: "{{ item.instances[0].private_ip_address }}"
-    loop: "{{ ec2_info.results }}"
-  
-  - name: create private ip r53 records
-    amazon.aws.route53:
-      state: present
-      zone: "{{ zone }}"
-      record: "{{ item.item}}.{{ zone }}"
-      type: A
-      ttl: 1
-      value: "{{ item.instances[0].private_ip_address }}"
-      wait: true
-      overwrite: true
-    loop: "{{ ec2_info.results }}"
+    - name: print private IP addresses
+      ansible.builtin.debug:
+        msg: "{{ item.instances[0].private_ip_address }}"
+      loop: "{{ ec2_info.results }}"
 
-  - name: create public ip for frontend
-    amazon.aws.route53:
-      state: present
-      zone: "{{ zone }}"
-      record: "{{ zone }}"
-      type: A
-      ttl: 1
-      value: "{{ item.instances[0].public_ip_address }}"
-      wait: true
-      overwrite: true
-    loop: "{{ ec2_info.results }}"
-    when: item.item == "frontend"
+    - name: create private ip r53 records
+      amazon.aws.route53:
+        state: present
+        zone: "{{ zone }}"
+        record: "{{ item.item }}.{{ zone }}"
+        type: A
+        ttl: 1
+        value: "{{ item.instances[0].private_ip_address }}"
+        wait: true
+        overwrite: true
+      loop: "{{ ec2_info.results }}"
+      when: item.item in ["mysql", "backend"]
 
-    
+    - name: create public ip for frontend
+      amazon.aws.route53:
+        state: present
+        zone: "{{ zone }}"
+        record: "{{ zone }}"
+        type: A
+        ttl: 1
+        value: "{{ item.instances[0].public_ip_address }}"
+        wait: true
+        overwrite: true
+      loop: "{{ ec2_info.results }}"
+      when: item.item == "frontend"
