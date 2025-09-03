@@ -37,17 +37,14 @@
     - name: print mysql private ip
       debug:
         msg: "{{ item.instances[0].private_ip_address }}"
-      loop: "{{ ec2_info.results }}"
       when: item.instances[0].tags.Name == "mysql"
 
     - name: print backend private ip
       debug:
         msg: "{{ item.instances[0].private_ip_address }}"
-      loop: "{{ ec2_info.results }}"
       when: item.instances[0].tags.Name == "backend"
 
     - name: print frontend public ip
       debug:
         msg: "{{ item.instances[0].public_ip_address }}"
-      loop: "{{ ec2_info.results }}"
       when: item.instances[0].tags.Name == "frontend"
